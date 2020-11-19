@@ -11,6 +11,10 @@ let package = Package(
             name: "Acclaim",
             targets: ["Acclaim"]
         ),
+        .library(
+            name: "Procedure",
+            targets: ["Procedure"]
+        ),
         .executable(
             name: "LoggerDemo",
             targets: ["Demo"]
