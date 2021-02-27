@@ -7,7 +7,11 @@
 
 import Foundation
 
-public struct Code {
+public protocol Code: LiteralDecorator, Formattable{
+    var value: Int { get }
+}
+
+public struct ValueCode: Code {
     public internal(set) var value: Int
     
     public init(_ value: Int){
@@ -15,9 +19,9 @@ public struct Code {
     }
 }
 
-extension Code: Formattable, LiteralDecorator{
+extension Code{
     public var literalCode:String{
-        return #"\033[\#(self.value)m"#
+        return "\u{001B}[0\(self.value)m"
     }
     
     public func format(_ text: String)->String{
@@ -26,14 +30,14 @@ extension Code: Formattable, LiteralDecorator{
 }
 
 extension String.StringInterpolation {
-    mutating func appendInterpolation(_ value: Code) {
+    mutating func appendInterpolation(_ value: ValueCode) {
         appendInterpolation(value.literalCode)
     }
 }
 
-public struct BoundaryCode{
-    public internal(set) var normal: Code
-    public internal(set) var reset: Code
+public struct BoundaryCode: Code{
+    public internal(set) var normal: ValueCode
+    public internal(set) var reset: ValueCode
     
     
     public var value: Int{
@@ -41,17 +45,22 @@ public struct BoundaryCode{
     }
 
     public init(_ normalCode: Int, reset resetCode: Int=0){
-        self.normal = Code(normalCode)
-        self.reset = Code(resetCode)
+        self.normal = ValueCode(normalCode)
+        self.reset = ValueCode(resetCode)
     }
-}
-
-extension BoundaryCode: Formattable, LiteralDecorator{
-    public var literalCode:String{
-        return self.normal.literalCode
-    }
-
+    
     public func format(_ text: String)->String{
-        return  #"\#(self.normal.format(text))\#(self.reset)"#
+        return "\(self.literalCode)\(text)\(self.reset)"
     }
 }
+
+//extension String.StringInterpolation {
+//    mutating func appendInterpolation() {
+//        let formatter = NumberFormatter()
+//        formatter.numberStyle = .spellOut
+//
+//        if let result = formatter.string(from: value as NSNumber) {
+//            appendLiteral(result)
+//        }
+//    }
+//}

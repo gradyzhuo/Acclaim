@@ -7,17 +7,22 @@
 
 import Foundation
 
-public enum TextColor{
+public protocol Stylable{
+    var normal: Code { get }
+    
+}
+
+public enum TextColor: Stylable{
     case config(normal: BoundaryCode, light:BoundaryCode?)
 
-    public var normal: BoundaryCode{
+    public var normal: Code{
         switch self{
         case .config(let normal, _):
             return normal
         }
     }
     
-    public var light: BoundaryCode{
+    public var light: Code{
         switch self{
         case .config(_, let light):
             guard let light = light else{
@@ -52,17 +57,17 @@ extension TextColor{
     public static let gray = TextColor.config(normal:BoundaryCode(90), light:BoundaryCode(37))
 }
 
-public enum BackgroundColor{
+public enum BackgroundColor: Stylable{
     case config(normal: BoundaryCode, light:BoundaryCode?)
 
-    public var normal: BoundaryCode{
+    public var normal: Code{
         switch self{
         case .config(let normal, _):
             return normal
         }
     }
     
-    public var light: BoundaryCode{
+    public var light: Code{
         switch self{
         case .config(_, let light):
             guard let light = light else{
@@ -98,10 +103,10 @@ extension BackgroundColor{
 }
 
 
-public enum Style{
+public enum TextStyle: Stylable{
     case config(normal: BoundaryCode)
 
-    public var normal: BoundaryCode{
+    public var normal: Code{
         switch self{
         case .config(let normal):
             return normal
@@ -109,7 +114,7 @@ public enum Style{
     }
 }
 
-extension Style:Formattable, LiteralDecorator{
+extension TextStyle:Formattable, LiteralDecorator{
     public var literalCode: String{
         return self.normal.literalCode
     }
@@ -120,11 +125,11 @@ extension Style:Formattable, LiteralDecorator{
 }
 
 
-extension Style{
-    public static let bold = Style.config(normal:BoundaryCode(1, reset: 21))
-    public static let dim = Style.config(normal:BoundaryCode(2, reset: 22))
-    public static let underlined = Style.config(normal:BoundaryCode(4, reset: 24))
-    public static let blink = Style.config(normal:BoundaryCode(5, reset: 25))
-    public static let reverse = Style.config(normal:BoundaryCode(7, reset: 27))
-    public static let hidden = Style.config(normal:BoundaryCode(8, reset: 28))
+extension TextStyle{
+    public static let bold = TextStyle.config(normal:BoundaryCode(1, reset: 21))
+    public static let dim = TextStyle.config(normal:BoundaryCode(2, reset: 22))
+    public static let underlined = TextStyle.config(normal:BoundaryCode(4, reset: 24))
+    public static let blink = TextStyle.config(normal:BoundaryCode(5, reset: 25))
+    public static let reverse = TextStyle.config(normal:BoundaryCode(7, reset: 27))
+    public static let hidden = TextStyle.config(normal:BoundaryCode(8, reset: 28))
 }

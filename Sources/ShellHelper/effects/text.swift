@@ -12,7 +12,7 @@ public struct ShellText{
     private var text: String
     public var textColor: TextColor = .default
     public var backgroundColor: BackgroundColor = .default
-    public var styles: [Style] = []
+    public var styles: [TextStyle] = []
     public var formatable: Bool = true
     
     public init(stringLiteral text: String) {
@@ -29,6 +29,7 @@ public struct ShellText{
         }
         var formatted = textColor.format(self.text)
         formatted = backgroundColor.format(formatted)
+        
         for s in styles{
             formatted = s.format(formatted)
         }

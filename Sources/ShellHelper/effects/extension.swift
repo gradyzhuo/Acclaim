@@ -9,7 +9,7 @@ import Foundation
 
 
 extension String {
-    public func effect(textColor: TextColor? = nil, backgroundColor:BackgroundColor? = nil, styles: Style...)->ShellText{
+    public func effect(textColor: TextColor? = nil, backgroundColor:BackgroundColor? = nil, styles: TextStyle...)->ShellText{
         var shellText = ShellText(self)
         if let textColor = textColor{
             shellText.textColor = textColor
@@ -23,7 +23,7 @@ extension String {
 }
 
 extension ShellText {
-    public func effect(textColor: TextColor? = nil, backgroundColor:BackgroundColor? = nil, styles: Style...)->ShellText{
+    public func effect(textColor: TextColor? = nil, backgroundColor:BackgroundColor? = nil, styles: TextStyle...)->ShellText{
         var shellText = self
         if let textColor = textColor{
             shellText.textColor = textColor
