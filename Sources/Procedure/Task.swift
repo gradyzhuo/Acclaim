@@ -50,7 +50,7 @@ extension Task {
     }
 }
 
-open class Task : Identitiable, Hashable, Shareable, CustomStringConvertible {
+open class Task : Identitiable, Hashable, CustomStringConvertible {
     
     public typealias Action = (InputIntents, @escaping (Result)->Void)->Void
     public internal(set) var identifier: String

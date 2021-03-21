@@ -20,9 +20,13 @@ public enum FlowControl {
 }
 
 
-open class Procedure : Step, Flowable{
+open class Procedure : Step, Flowable, Identitiable{
     public private(set) var start: Step
     public private(set) var end: Step
+    
+    public var previous: Step?
+    
+    public var identifier: String = Utils.Generator.identifier()
     
     public var next: Step?{
         set{

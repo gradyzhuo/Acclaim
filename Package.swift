@@ -57,7 +57,7 @@ let package = Package(
         ),
         .target(
             name: "Procedure",
-            dependencies: []
+            dependencies: ["Logger"]
         ),
         .testTarget(
             name: "ProcedureTests",

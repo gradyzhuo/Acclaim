@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import ShellHelper
 
 public struct Logger{
     public internal(set) static var critical = LoggingManager<StderrLogging>(level: .critical, textColor: .red, backgroundColor: .white)
@@ -17,5 +18,12 @@ public struct Logger{
     
     public internal(set) static var fatal    = critical
     public internal(set) static var warn     = warnning
+}
+
+extension Logger{
+    public struct Config{
+        public var colored: Bool
+    }
     
+    public static var rootConfig: Config = Config(colored: true)
 }

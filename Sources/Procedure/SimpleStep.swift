@@ -9,8 +9,9 @@
 import Foundation
 
 public typealias OutputIntents = Intents
-open class SimpleStep : Step, Propagatable, Flowable, Shareable, CustomStringConvertible {
-
+open class SimpleStep : Step, Propagatable, Flowable, CustomStringConvertible, Identitiable {
+    public var previous: Step?
+    
     public typealias IntentType = SimpleIntent
     
     public var identifier: String{
@@ -44,7 +45,7 @@ open class SimpleStep : Step, Propagatable, Flowable, Shareable, CustomStringCon
         self.init(task: newTask)
     }
     
-    internal init(tasks:[Task] = [], attributes: DispatchQueue.Attributes = .concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = .inherit, qos: DispatchQoS = .userInteractive, other: SimpleStep? = nil){
+    internal init(tasks:[Task], attributes: DispatchQueue.Attributes = .concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = .inherit, qos: DispatchQoS = .default, other: SimpleStep? = nil){
         self.autoreleaseFrequency = autoreleaseFrequency
         self.attributes = attributes
         self.qos = qos
@@ -83,10 +84,8 @@ open class SimpleStep : Step, Propagatable, Flowable, Shareable, CustomStringCon
     }
 
     public func run(with inputs: Intents, direction: Task.PropagationDirection){
-        let privateRunfunction = self._run
-        DispatchQueue.main.async {
-            privateRunfunction(inputs, direction)
-        }
+        let workItem = self._run(with: inputs, direction: direction)
+        self.queue.sync(execute: workItem)
     }
     
     public func cancel(){
@@ -95,25 +94,25 @@ open class SimpleStep : Step, Propagatable, Flowable, Shareable, CustomStringCon
         }
     }
     
-    internal func _run(with inputs: Intents, direction: Task.PropagationDirection){
+    internal func _run(with inputs: Intents, direction: Task.PropagationDirection)->DispatchWorkItem{
         let queue = self.queue
+        let didFinish = self.actionsDidFinish
         let group = DispatchGroup()
-        
-        var outputs: Intents = []
-        
-        self.tasks.filter{ $0.propagationDirection == direction }.forEach{ task in
-            group.enter()
-            task.run(with: inputs, inQueue: queue){ action, intents in
-                outputs.add(intents: intents)
-                
-                group.leave()
+        let workItem = DispatchWorkItem{
+            var outputs: Intents = []
+            self.tasks.filter{ $0.propagationDirection == direction }.forEach{ task in
+                group.enter()
+                task.run(with: inputs, inQueue: queue){ action, intents in
+                    outputs.add(intents: intents)
+                    group.leave()
+                }
+            }
+            group.notify(queue: self.queue){
+                print("here notify")
+                didFinish(inputs, outputs)
             }
         }
-        let current = self
-        group.notify(queue: DispatchQueue.main){
-            current.actionsDidFinish(original: inputs, outputs: outputs)
-        }
-        
+        return workItem
     }
     
     internal func actionsDidFinish(original inputs: Intents, outputs: Intents){
@@ -194,8 +193,7 @@ extension SimpleStep : Copyable{
     
     public func copy(with zone: NSZone? = nil) -> Any {
         let tasksCopy = self.tasks.map{ $0.copy }
-        let aCopy = SimpleStep(attributes: attributes, autoreleaseFrequency: autoreleaseFrequency, qos: qos)
-        aCopy.invoke(tasks: tasksCopy)
+        let aCopy = SimpleStep(tasks: tasksCopy, attributes: attributes, autoreleaseFrequency: autoreleaseFrequency, qos: qos)
         aCopy.flowHandler = flowHandler
         return aCopy
     }

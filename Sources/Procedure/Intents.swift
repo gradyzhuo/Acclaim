@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Logger
 
 public struct Intents {
     public typealias IntentType = Intent
@@ -23,7 +24,7 @@ public struct Intents {
     public mutating func add(intent: IntentType?){
         
         guard let intent = intent else{
-            Utils.Log(debug: "An intent to add into intents(\(withUnsafePointer(to: &self, { $0 }))) is nil.")
+            Logger.debug("An intent to add into intents(\(withUnsafePointer(to: &self, { $0 }))) is nil.")
             return
         }
         storage[intent.command] = intent

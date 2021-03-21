@@ -50,7 +50,13 @@ public struct LoggingManager<Logging: LoggingType>{
         let formatter = DateFormatter()
         formatter.dateFormat = "YYYY-MM-dd hh:mm:ss"
         
-        var effected = "[\(formatter.string(from: Date()))] \(self.current.level.name):".effect()
+        let prefixText = "[\(formatter.string(from: Date()))] \(self.current.level.name):"
+        
+        guard Logger.rootConfig.colored else {
+            return prefixText
+        }
+        
+        var effected = prefixText.effect()
         effected.textColor = self.textColor
         effected.backgroundColor = self.backgroundColor
         effected.styles = self.textStyles

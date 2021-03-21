@@ -19,27 +19,8 @@ public protocol Intent : ExpressibleByNilLiteral {
     init(command: String, value: Any?)
 }
 
-private let kCommand = UnsafeMutableRawPointer.allocate(byteCount: 0, alignment: 0)
-private let kValue = UnsafeMutableRawPointer.allocate(byteCount: 0, alignment: 0)
 extension Intent {
-    public internal(set) var command: String  {
-        set{
-            objc_setAssociatedObject(self, kCommand, newValue, .OBJC_ASSOCIATION_COPY)
-        }
-        get{
-            return objc_getAssociatedObject(self, kCommand) as! String
-        }
-    }
 
-    public internal(set) var value: Any?  {
-        set{
-            objc_setAssociatedObject(self, kValue, newValue, .OBJC_ASSOCIATION_COPY)
-        }
-        get{
-            return objc_getAssociatedObject(self, kValue)
-        }
-    }
-    
     public init(nilLiteral: ()){
         self = Self.init(command: __ExpressibleByNilLiteral__, value: nil)
     }
@@ -52,25 +33,11 @@ public protocol Identitiable {
     var identifier: String { get }
 }
 
-private let kIdentifier = UnsafeMutableRawPointer.allocate(byteCount: 0, alignment: 0)
-extension Identitiable {
-    public var identifier: String {
-        get{
-            guard let id = objc_getAssociatedObject(self, kIdentifier) as? String else{
-                let identifier = Utils.Generator.identifier()
-                objc_setAssociatedObject(self, kIdentifier, identifier, .OBJC_ASSOCIATION_COPY)
-                return identifier
-            }
-            return id
-        }
-    }
-}
-
-public protocol Flowable: Identitiable {
+public protocol Flowable {
     /**
      (readonly)
      */
-    var previous: Step? { get }
+    var previous: Step? { set get }
     var next: Step? { set get }
     
     var last:Step { get }
@@ -86,27 +53,16 @@ public protocol Step : Flowable {
     func run(with intents: Intents)
 }
 
-let kPrevious = UnsafeMutableRawPointer.allocate(byteCount: 0, alignment: 0)
 extension Step {
     
     public var last:Step{
         var nextStep: Step = self
-        
+
         while let next = nextStep.next {
             nextStep = next
         }
         return nextStep
     }
-    
-    public internal(set) var previous: Step?{
-        set{
-            objc_setAssociatedObject(self, kPrevious, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-        get{
-            return objc_getAssociatedObject(self, kPrevious) as? Step
-        }
-    }
-    
     
     /**
      設定接續的step，預設會串連在 last step 後面.
@@ -154,42 +110,25 @@ public protocol Propagatable : Step, Invocable{
 
 //MARK: - Shareable
 
-let k = UnsafeMutableRawPointer.allocate(byteCount: 0, alignment: 0)
-public protocol Shareable : Copyable, Identitiable{
-    
-}
+//let k = UnsafeMutableRawPointer.allocate(byteCount: 0, alignment: 0)
+//public protocol Shareable : Copyable, Identitiable{
+//
+//}
 
-extension Shareable {
-    
-    private static var instances:[String:Self] {
-        
-        set{
-            objc_setAssociatedObject(self, k, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-        get{
-            guard let instances = objc_getAssociatedObject(self, k) as? [String:Self] else{
-                
-                let newInstances = [String:Self]()
-                Self.instances = newInstances
-                
-                return newInstances
-            }
-            
-            
-            return instances
-        }
-    }
-    
-    public static func shared(forKey key: String)->Self?{
-        return instances[key]?.copy
-    }
-    
-    public func share()->String{
-        self.share(forKey: identifier)
-        return identifier
-    }
-    
-    public func share(forKey key:String){
-        Self.instances[key] = copy
-    }
-}
+//private var instances:[String:Shareable] = [:]
+//
+//extension Shareable {
+//
+//    public static func shared(forKey key: String)->Self?{
+//        return instances[key]?.copy
+//    }
+//
+//    public func share()->String{
+//        self.share(forKey: identifier)
+//        return identifier
+//    }
+//
+//    public func share(forKey key:String){
+//        Self.instances[key] = copy
+//    }
+//}

@@ -10,10 +10,6 @@ import Foundation
 
 public struct Utils {
     
-    public static func Log(debug messages: Any...){
-        print("[Debug]: \(messages.reduce(""){ "\($0) \($1)" })")
-    }
-    
 }
 
 extension Utils{
